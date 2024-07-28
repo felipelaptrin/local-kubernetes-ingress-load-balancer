@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.11.0/.schema/devbox.schema.json",
+  "packages": [
+    "kind@0.23.0",
+    "kubernetes-helm@3.15.3",
+    "kubectl@1.30.2",
+    "kfilt@0.0.8"
+  ],
+  "env": {
+    "KIND_EXPERIMENTAL_DOCKER_NETWORK": "custom-kind-network"
+  },
+  "shell": {
+    "scripts": {
+      "init": [
+        "kind create cluster --config kind.yaml",
+        "kustomize build metallb --enable-helm | kfilt -i kind=CustomResourceDefinition | kubectl apply -f -",
+        "kustomize build metallb --enable-helm | kfilt -i kind=CustomResourceDefinition | kubectl wait --for condition=established --timeout=60s -f -",
+        "kustomize build metallb --enable-helm | kubectl apply -f -",
+        "echo '[INFO] Waiting metallb be ready...'",
+        "kubectl wait -n metallb -l app.kubernetes.io/component=controller --for=condition=ready pod --timeout=120s",
+        "kustomize build ingress-nginx --enable-helm | kubectl apply -f -",
+        "echo '[INFO] Waiting ingress-nginx be ready...'",
+        "kubectl wait -n ingress-nginx -l app.kubernetes.io/component=controller --for=condition=ready pod --timeout=120s"
+      ],
+      "destroy": [
+        "kind delete cluster"
+      ],
+      "app-load-balancer": [
+        "kubectl apply -k app-load-balancer"
+      ],
+      "app-ingress": [
+        "kubectl apply -k app-ingress"
+      ]
+    }
+  }
+}
