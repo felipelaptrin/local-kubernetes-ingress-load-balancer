@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: app-ingress
+  name: app-ingress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-ingress
+  template:
+    metadata:
+      labels:
+        app: app-ingress
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        command:
+          - sh
+          - "-c"
+          - "echo 'Hello, from app-ingress' > /usr/share/nginx/html/index.html && nginx -g 'daemon off;'"

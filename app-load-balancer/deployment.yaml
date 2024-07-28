@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: app-load-balancer
+  name: app-load-balancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-load-balancer
+  template:
+    metadata:
+      labels:
+        app: app-load-balancer
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        command:
+          - sh
+          - -c
+          - "echo 'Hello, from app-load-balancer' > /usr/share/nginx/html/index.html && nginx -g 'daemon off;'"
